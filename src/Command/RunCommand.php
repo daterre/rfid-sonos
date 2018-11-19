@@ -58,6 +58,8 @@ class RunCommand extends Command
             $playlistManager->useCard($code);
         });
 
+        $playlistManager->playNotification('startup');
+
         $keyboardListener->run();
 
         return 0;

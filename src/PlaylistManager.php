@@ -122,7 +122,7 @@ class PlaylistManager
         call_user_func($this->responseCallback, $message);
     }
 
-    private function playNotification(string $message = "null")
+    public function playNotification(string $message = "null")
     {
         // $smbUrl = null;
         // $smbFolder = null;

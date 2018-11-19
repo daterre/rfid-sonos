@@ -2,7 +2,7 @@
     "require": {
         "symfony/console": "@stable",
         "symfony/stopwatch": "@stable",
-        "duncan3dc/sonos": "^1.9",
+        "duncan3dc/sonos": "^2.1",
         "monolog/monolog": "^1.23",
         "ext-soap": "*",
         "ext-curl": "*",
@@ -16,5 +16,7 @@
         "psr-4": {
             "bearonahill\\": "src/"
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

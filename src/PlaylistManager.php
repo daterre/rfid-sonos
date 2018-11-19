@@ -4,10 +4,10 @@ namespace bearonahill;
 
 use bearonahill\Exception\MissingConfigException;
 use duncan3dc\Sonos\Network;
+use duncan3dc\Sonos\Tracks\Track;
 use duncan3dc\Sonos\Tracks\TextToSpeech;
 use duncan3dc\Sonos\Directory;
 use duncan3dc\Sonos\Tracks\Stream;
-use Doctrine\Common\Cache\ArrayCache;
 use bearonahill\Database\PlaylistDatabase;
 use bearonahill\Exception\PlaylistNotFoundException;
 use League\Flysystem\Adapter\Local;
@@ -29,7 +29,7 @@ class PlaylistManager
         $this->database = $database;
         $this->targetRoom = $targetRoom;
 
-        $this->sonos = new Network(new ArrayCache);
+        $this->sonos = new Network();
         $this->controller = $this->sonos->getControllerByRoom($targetRoom->getName());
     }
 
@@ -46,7 +46,8 @@ class PlaylistManager
             $playlist = $this->database->getPlaylistFromCard($code);
         } catch (PlaylistNotFoundException $e) {
             $this->respondWithMessage($e->getMessage());
-            $this->playNotification($e->getMessage());
+            //$this->playNotification($e->getMessage());
+            $this->playNotification('error');
             return;
         }
 
@@ -94,12 +95,15 @@ class PlaylistManager
 
     private function startQueue(string $playlistName)
     {
+        $this->playNotification('select');
+
         $playlist = $this->sonos->getPlaylistByName($playlistName);
         $tracks = $playlist->getTracks();
 
         if (!is_array($tracks) || count($tracks) === 0) {
             $this->respondWithMessage('Added '.count($tracks).' to the playlist');
-            $this->playNotification('The selected playlist is empty or does not exist.');
+            //$this->playNotification('The selected playlist is empty or does not exist.');
+            $this->playNotification('error');
             return;
         }
 
@@ -118,29 +122,31 @@ class PlaylistManager
         call_user_func($this->responseCallback, $message);
     }
 
-    private function playNotification(string $message)
+    private function playNotification(string $message = "null")
     {
-        $smbUrl = null;
-        $smbFolder = null;
+        // $smbUrl = null;
+        // $smbFolder = null;
 
-        try {
-            $smbFolder = $this->database->getConfig('smb.folder');
-            $smbUrl = $this->database->getConfig('smb.url');
-        } catch (MissingConfigException $e) {
-            $this->respondWithMessage($e->getMessage());
-        }
+        // try {
+        //     $smbFolder = $this->database->getConfig('smb.folder');
+        //     $smbUrl = $this->database->getConfig('smb.url');
+        // } catch (MissingConfigException $e) {
+        //     $this->respondWithMessage($e->getMessage());
+        // }
 
-        if (empty($smbFolder) || empty($smbUrl)) {
-            $this->respondWithMessage('Audio notification not configured.');
-            return;
-        }
+        // if (empty($smbFolder) || empty($smbUrl)) {
+        //     $this->respondWithMessage('Audio notification not configured.');
+        //     return;
+        // }
 
-        $adapter = new Local($smbFolder);
-        $filesystem = new Filesystem($adapter);
+        // $adapter = new Local($smbFolder);
+        // $filesystem = new Filesystem($adapter);
 
-        $directory = new Directory($filesystem, $smbUrl, "tts");
+        // $directory = new Directory($filesystem, $smbUrl, "tts");
 
-        $track = new TextToSpeech($message, $directory);
+        // $track = new TextToSpeech($message, $directory);
+
+        $track = new Track("x-file-cifs://MUSICBOX/tracks/$message.mp3");
         $this->controller->interrupt($track);
     }
 }

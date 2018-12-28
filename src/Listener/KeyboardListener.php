@@ -64,12 +64,17 @@ class KeyboardListener
             }
 
             if ($this->codeIsComplete($data['code'])) {
-                call_user_func($this->callback, implode(',', $code));
-                $code = [];
-                continue;
-            }
 
-            $code[] = $this->getKeyFromKeyCode($data['code']);
+                // sometimes card reader sends an empty carriage return so take the code only if it isn't empty
+                if (count($code) > 0) {
+                    call_user_func($this->callback, implode(',', $code));
+                    $code = [];
+                    continue;
+                }
+            }
+            else {
+                $code[] = $this->getKeyFromKeyCode($data['code']);
+            }
         }
     }
 

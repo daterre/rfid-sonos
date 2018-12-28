@@ -16,6 +16,6 @@ apt-get install php7.1-xml (might need to apt-get update again first)
 apt-get install php7.1-soap
 apt-get install -y samba samba-common-bin smbclient cifs-utils (for UI mp3)
 configure /etc/samba/smb.conf
-configure /etc/systemd/system/rfid-sonos.service (set permissions to execute)
+configure /etc/systemd/system/rfid-sonos.service, changed from Type=forking to Type=simple (set permissions to execute)
 copy rfid-sonos.phar along with tracks dir (for UI mp3) (set permissions to execute)
 sudo systemctl enable rfid-sonos (enable service on boot)

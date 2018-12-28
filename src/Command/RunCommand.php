@@ -52,6 +52,13 @@ class RunCommand extends Command
             $logger->debug($message);
         });
 
+        // This might fail so keep trying
+        $initSuccess = false;
+        do{
+            $initSuccess = $playlistManager->initController();
+        }
+        while (!$initSuccess);
+
         $keyboardListener = new KeyboardListener($keyboardSource);
         $keyboardListener->setCallback(function($code) use ($playlistManager, $logger) {
             $logger->debug('Detected card '.$code);

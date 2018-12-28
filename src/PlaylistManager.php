@@ -24,13 +24,26 @@ class PlaylistManager
     private $sonos;
     private $controller;
 
+    private $lastPlaylist;
+
     public function __construct(PlaylistDatabase $database, TargetRoom $targetRoom)
     {
         $this->database = $database;
         $this->targetRoom = $targetRoom;
 
         $this->sonos = new Network();
-        $this->controller = $this->sonos->getControllerByRoom($targetRoom->getName());
+    }
+
+    public function initController()
+    {
+        try {
+            $this->controller = $this->sonos->getControllerByRoom($this->targetRoom->getName());
+        }
+        catch(RuntimeException $ex){
+            $this->respondWithMessage($e->getMessage());
+            return false;
+        }
+        return true;
     }
 
     public function setResponseCallback(callable $callback)
@@ -51,7 +64,15 @@ class PlaylistManager
             return;
         }
 
+        // Don't replay last played album
+        if ($playlist == $this->lastPlaylist)
+            return;
+        $this->lastPlaylist = $playlist;
+
+        $this->playNotification('select');
+
         if ($this->playlistIsAStream($playlist)) {
+
             $this->startStream($playlist);
             return;
         }
@@ -95,8 +116,6 @@ class PlaylistManager
 
     private function startQueue(string $playlistName)
     {
-        $this->playNotification('select');
-
         $playlist = $this->sonos->getPlaylistByName($playlistName);
         $tracks = $playlist->getTracks();
 
